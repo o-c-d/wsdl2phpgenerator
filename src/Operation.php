@@ -19,6 +19,11 @@ class Operation
     private $name;
 
     /**
+     * @var ConfigInterface
+     */
+    private $config;
+
+    /**
      * @var array An array with Variables
      * @see Variable
      */
@@ -36,13 +41,15 @@ class Operation
 
     /**
      *
+     * @param ConfigInterface $config
      * @param string $name
      * @param string $paramStr The parameter string for a operation from the wsdl
      * @param string $description
      * @param string $returns
      */
-    public function __construct($name, $paramStr, $description, $returns)
+    public function __construct(ConfigInterface $config, $name, $paramStr, $description, $returns)
     {
+        $this->config = $config;
         $this->name = $name;
         $this->params = array();
         $this->description = $description;
@@ -93,7 +100,7 @@ class Operation
                 foreach ($validTypes as $type) {
                     if ($type instanceof ComplexType) {
                         if ($typeHint == $type->getPhpIdentifier()) {
-                            $ret .= $typeHint . ' ';
+                            $ret .= (!empty($this->config->get('namespaceName')) ? "\\".$this->config->get('namespaceName')."\\":'').( !empty($this->config->get('addNamespaceModelSuffix')) ? $this->config->get('addNamespaceModelSuffix')."\\":'' ).$typeHint . ' ';
                             break;
                         }
                     }
@@ -125,7 +132,7 @@ class Operation
         $paramType = '';
         foreach ($this->params as $value => $typeHint) {
             if ($name == $value) {
-                $paramType = $typeHint;
+                $paramType =  (!empty($this->config->get('namespaceName')) ? "\\".$this->config->get('namespaceName')."\\":'').( !empty($this->config->get('addNamespaceModelSuffix')) ? $this->config->get('addNamespaceModelSuffix')."\\":'' ).$typeHint;
             }
         }
 

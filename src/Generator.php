@@ -122,7 +122,7 @@ class Generator implements GeneratorInterface
         foreach ($this->wsdl->getOperations() as $function) {
             $this->log('Loading function ' . $function->getName());
 
-            $this->service->addOperation(new Operation($function->getName(), $function->getParams(), $function->getDocumentation(), $function->getReturns()));
+            $this->service->addOperation(new Operation($this->config, $function->getName(), $function->getParams(), $function->getDocumentation(), $function->getReturns()));
         }
 
         $this->log('Done loading service ' . $service->getName());

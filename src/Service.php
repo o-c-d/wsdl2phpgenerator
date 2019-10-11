@@ -162,7 +162,9 @@ class Service implements ClassGenerator
       $options[\'classmap\'][$key] = $value;
     }
   }' . PHP_EOL;
-        $source .= '  $options = array_merge(' . var_export($this->config->get('soapClientOptions'), true) . ', $options);' . PHP_EOL;
+        $source .= '  $options = array_merge(' . PHP_EOL;
+        $source .=  var_export($this->config->get('soapClientOptions'), true) .', '. PHP_EOL;
+        $source .= '  $options);' . PHP_EOL;
         $source .= '  if (!$wsdl) {' . PHP_EOL;
         $source .= '    $wsdl = \'' . $this->config->get('inputFile') . '\';' . PHP_EOL;
         $source .= '  }' . PHP_EOL;
@@ -181,7 +183,7 @@ class Service implements ClassGenerator
         $init = array();
         foreach ($this->types as $type) {
             if ($type instanceof ComplexType) {
-                $init[$type->getIdentifier()] = $this->config->get('namespaceName') . "\\" . $type->getPhpIdentifier();
+                $init[$type->getIdentifier()] = $this->config->get('namespaceName') .( !empty($this->config->get('addNamespaceModelSuffix')) ? "\\".$this->config->get('addNamespaceModelSuffix'):'' ). "\\" . $type->getPhpIdentifier();
             }
         }
         $var = new PhpVariable('private static', $name, var_export($init, true), $comment);
@@ -194,14 +196,23 @@ class Service implements ClassGenerator
             $name = Validator::validateOperation($operation->getName());
 
             $comment = new PhpDocComment($operation->getDescription());
-            $comment->setReturn(PhpDocElementFactory::getReturn($operation->getReturns(), ''));
+            $comment->setReturn(PhpDocElementFactory::getReturn( (!empty($this->config->get('namespaceName'))? "\\" .$this->config->get('namespaceName') : '' ) .( !empty($this->config->get('addNamespaceModelSuffix')) ? "\\".$this->config->get('addNamespaceModelSuffix'):'' ). "\\" .$operation->getReturns(), ''));
 
             foreach ($operation->getParams() as $param => $hint) {
                 $arr = $operation->getPhpDocParams($param, $this->types);
                 $comment->addParam(PhpDocElementFactory::getParam($arr['type'], $arr['name'], $arr['desc']));
             }
 
-            $source = '  return $this->__soapCall(\'' . $operation->getName() . '\', array(' . $operation->getParamStringNoTypeHints() . '));' . PHP_EOL;
+            $source = '';
+            $source .= '    try {'.PHP_EOL;
+            $source .= '        $response = $this->__soapCall(\'' . $operation->getName() . '\', array(' . $operation->getParamStringNoTypeHints() . '));' . PHP_EOL;
+            $source .= '    } catch (\SoapFault $fault) {'.PHP_EOL;
+            $source .= '        $response = $fault->faultcode."-".$fault->faultstring;'.PHP_EOL;
+            $source .= '    }'.PHP_EOL;
+            $source .= '    return $response;'.PHP_EOL;
+            // $source .= ''.PHP_EOL;
+            // $source = '';
+            // $source = '  return $this->__soapCall(\'' . $operation->getName() . '\', array(' . $operation->getParamStringNoTypeHints() . '));' . PHP_EOL;
 
             $paramStr = $operation->getParamString($this->types);
 

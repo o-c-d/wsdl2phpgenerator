@@ -50,11 +50,14 @@ class OutputManager
 
         $this->saveClassToFile($service);
         foreach ($types as $type) {
-            $this->saveClassToFile($type);
+            $this->saveClassToFile($type, true);
         }
 
-        $classes = array_merge(array($service), $types);
-        $this->saveAutoloader($service->getIdentifier(), $classes);
+        if($this->config->get('withAutoloader'))
+        {
+            $classes = array_merge(array($service), $types);
+            $this->saveAutoloader($service->getIdentifier(), $service, $types);
+        }
     }
 
     /**
@@ -73,6 +76,11 @@ class OutputManager
                 throw new Exception('Could not create output directory and it does not exist!');
             }
         }
+        if (!empty($this->config->get('addNamespaceModelSuffix'))&&is_dir($outputDirectory.DIRECTORY_SEPARATOR.$this->config->get('addNamespaceModelSuffix')) == false) {
+            if (mkdir($outputDirectory.DIRECTORY_SEPARATOR.$this->config->get('addNamespaceModelSuffix'), 0777, true) == false) {
+                throw new Exception('Could not create output directory and it does not exist!');
+            }
+        }
 
         $this->dir = $outputDirectory;
     }
@@ -83,18 +91,20 @@ class OutputManager
      *
      * @param PhpClass $class
      */
-    private function saveClassToFile(PhpClass $class)
+    private function saveClassToFile(PhpClass $class, bool $isModel = false)
     {
         if ($this->isValidClass($class)) {
             $file = new PhpFile($class->getIdentifier());
 
             $namespace = $this->config->get('namespaceName');
+            if($isModel && !empty($this->config->get('addNamespaceModelSuffix'))) $namespace .= '\\'.$this->config->get('addNamespaceModelSuffix');
             if (!empty($namespace)) {
                 $file->addNamespace($namespace);
             }
 
             $file->addClass($class);
-            $file->save($this->dir);
+            if($isModel && !empty($this->config->get('addNamespaceModelSuffix'))) $file->save($this->dir.DIRECTORY_SEPARATOR.$this->config->get('addNamespaceModelSuffix'));
+            else $file->save($this->dir);
         }
     }
 
@@ -121,7 +131,7 @@ class OutputManager
      * @param string $name The name of the autoloader. Should be unique for the service to avoid name clashes.
      * @param PhpClass[] $classes The classes to include in the autoloader.
      */
-    private function saveAutoloader($name, array $classes)
+    private function saveAutoloader($name, PhpClass $service, array $types)
     {
         $autoloaderName = 'autoload_' . md5($name . $this->config->get('namespaceName'));
 
@@ -131,10 +141,14 @@ class OutputManager
         //
         // First we generate a string containing the known classes and the paths they map to. One line for each string.
         $autoloadedClasses = array();
-        foreach ($classes as $class) {
-            $className = $this->config->get('namespaceName') . '\\' . $class->getIdentifier();
+        //add service to autolaod
+        $className = $this->config->get('namespaceName') . '\\' . $service->getIdentifier();
+        $className = ltrim($className, '\\');
+        $autoloadedClasses[] = "'" . $className . "' => __DIR__ .'/" . $service->getIdentifier() . ".php'";
+        foreach ($types as $class) {
+            $className = $this->config->get('namespaceName') .( !empty($this->config->get('addNamespaceModelSuffix')) ? '\\'.$this->config->get('addNamespaceModelSuffix'):'' ). '\\' . $class->getIdentifier();
             $className = ltrim($className, '\\');
-            $autoloadedClasses[] = "'" . $className . "' => __DIR__ .'/" . $class->getIdentifier() . ".php'";
+            $autoloadedClasses[] = "'" . $className . "' => __DIR__ .'/" .( !empty($this->config->get('addNamespaceModelSuffix')) ? $this->config->get('addNamespaceModelSuffix').DIRECTORY_SEPARATOR:'' ). $class->getIdentifier() . ".php'";
         }
         $autoloadedClasses = implode(',' . PHP_EOL . str_repeat(' ', 8), $autoloadedClasses);
 
