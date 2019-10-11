@@ -5,6 +5,15 @@
 [![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/wsdl2phpgenerator/wsdl2phpgenerator/badges/quality-score.png?s=23e602a86f75a79a2f1013caac99558f2464ce74)](https://scrutinizer-ci.com/g/wsdl2phpgenerator/wsdl2phpgenerator/)
 [![Dependency Status](https://www.versioneye.com/user/projects/52697615632bac67b2002e93/badge.png)](https://www.versioneye.com/user/projects/52697615632bac67b2002e93)
 
+
+Fork from wsdl2phpgenerator/wsdl2phpgenerator
+- fix symfony 4 options-resolver requirements
+- fix PhpClass.php initialisation of $implements property
+- add "withAutoloader" boolean option to disable autoloader generation
+- add "namespaceModelSuffix" string option to create types objects in a subfloder and sub namespace
+
+Original Readme file :
+
 Simple WSDL to PHP classes converter. Takes a WSDL file and outputs class files ready to use.
 
 Uses the [MIT license](http://www.opensource.org/licenses/mit-license.php).
