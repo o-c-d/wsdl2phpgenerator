@@ -162,9 +162,24 @@ class Service implements ClassGenerator
       $options[\'classmap\'][$key] = $value;
     }
   }' . PHP_EOL;
-        $source .= '  $options = array_merge(' . PHP_EOL;
-        $source .=  var_export($this->config->get('soapClientOptions'), true) .', '. PHP_EOL;
-        $source .= '  $options' . PHP_EOL;
+        $source .= '  $options = array_merge([' . PHP_EOL;
+        foreach($this->config->get('soapClientOptions') as $key => $value)
+        {
+            if(is_array($value))
+            {
+                $source .= "        '".$key."' => [" . PHP_EOL;
+                foreach($value as $key2=>$value2)
+                {
+                    $source .= "            '".$key2."' => ".$value2."," . PHP_EOL;
+                }
+                $source .= "        ]," . PHP_EOL;
+            } else {
+                $source .= "        '".$key."' => ".$value."," . PHP_EOL;
+            }
+
+        }
+        $source .= '        ], ' . PHP_EOL;
+        $source .= '        $options' . PHP_EOL;
         $source .= '  );' . PHP_EOL;
         $source .= '  if (!$wsdl) {' . PHP_EOL;
         $source .= '    $wsdl = \'' . $this->config->get('inputFile') . '\';' . PHP_EOL;
@@ -197,7 +212,7 @@ class Service implements ClassGenerator
             $name = Validator::validateOperation($operation->getName());
 
             $comment = new PhpDocComment($operation->getDescription());
-            $comment->setReturn(PhpDocElementFactory::getReturn( (!empty($this->config->get('namespaceName'))? "\\" .$this->config->get('namespaceName') : '' ) .( !empty($this->config->get('namespaceModelSuffix')) ? "\\".$this->config->get('namespaceModelSuffix'):'' ). "\\" .$operation->getReturns(), ''));
+            $comment->setReturn(PhpDocElementFactory::getReturn( (!empty($this->config->get('namespaceName'))? $this->config->get('namespaceName')."\\" : '' ) .( !empty($this->config->get('namespaceModelSuffix')) ? $this->config->get('namespaceModelSuffix')."\\":'' ). $operation->getReturns(), ''));
 
             foreach ($operation->getParams() as $param => $hint) {
                 $arr = $operation->getPhpDocParams($param, $this->types);
