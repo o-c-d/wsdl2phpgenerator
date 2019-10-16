@@ -184,7 +184,14 @@ class Service implements ClassGenerator
         $source .= '  if (!$wsdl) {' . PHP_EOL;
         $source .= '    $wsdl = \'' . $this->config->get('inputFile') . '\';' . PHP_EOL;
         $source .= '  }' . PHP_EOL;
-        $source .= '  parent::__construct($wsdl, $options);' . PHP_EOL;
+        $source .= '  try {' . PHP_EOL;
+        $source .= '    parent::__construct($wsdl, $options);' . PHP_EOL;
+        $source .= '  }' . PHP_EOL;
+        $source .= '  catch(\SoapFault $fault)' . PHP_EOL;
+        $source .= '  {' . PHP_EOL;
+        $source .= '    // TODO: Add Soap Exception' . PHP_EOL;
+        $source .= '    // $message = "Error #".$fault->faultcode.": ".$fault->faultstring ;' . PHP_EOL;
+        $source .= '  }' . PHP_EOL;
 
         $function = new PhpFunction('public', '__construct', '$wsdl = null, array $options = array()', $source, $comment);
 
@@ -212,7 +219,7 @@ class Service implements ClassGenerator
             $name = Validator::validateOperation($operation->getName());
 
             $comment = new PhpDocComment($operation->getDescription());
-            $comment->setReturn(PhpDocElementFactory::getReturn( (!empty($this->config->get('namespaceName'))? $this->config->get('namespaceName')."\\" : '' ) .( !empty($this->config->get('namespaceModelSuffix')) ? $this->config->get('namespaceModelSuffix')."\\":'' ). $operation->getReturns(), ''));
+            $comment->setReturn(PhpDocElementFactory::getReturn( ( !empty($this->config->get('namespaceModelSuffix')) ? $this->config->get('namespaceModelSuffix')."\\":'' ). $operation->getReturns(), ''));
 
             foreach ($operation->getParams() as $param => $hint) {
                 $arr = $operation->getPhpDocParams($param, $this->types);
@@ -222,8 +229,8 @@ class Service implements ClassGenerator
             $source = '';
             $source .= '    try {'.PHP_EOL;
             $source .= '        $response = $this->__soapCall(\'' . $operation->getName() . '\', array(' . $operation->getParamStringNoTypeHints() . '));' . PHP_EOL;
-            $source .= '    } catch (\SoapFault $fault) {'.PHP_EOL;
-            $source .= '        $response = $fault->faultcode."-".$fault->faultstring;'.PHP_EOL;
+            $source .= '    } catch (\Exception $e) {'.PHP_EOL;
+            $source .= '        $response = $e->getMessage();'.PHP_EOL;
             $source .= '    }'.PHP_EOL;
             $source .= '    return $response;'.PHP_EOL;
             // $source .= ''.PHP_EOL;

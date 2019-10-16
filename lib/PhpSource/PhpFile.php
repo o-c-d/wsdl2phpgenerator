@@ -89,10 +89,15 @@ class PhpFile
      * Saves the source code for the file in $directory
      *
      * @param string $directory Should be / terminated and writeable
+     * @param boolean $overwrite Should the files be overwrite
      */
-    public function save($directory)
+    public function save($directory, $overwrite=true)
     {
-        file_put_contents($directory . DIRECTORY_SEPARATOR . $this->name . '.php', $this->getSource());
+        $filePath = $directory . DIRECTORY_SEPARATOR . $this->name . '.php' ;
+        if($overwrite||!file_exists($filePath))
+        {
+            file_put_contents($filePath, $this->getSource());
+        }
     }
 
     /**

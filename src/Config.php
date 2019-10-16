@@ -70,6 +70,7 @@ class Config implements ConfigInterface
             'namespaceName'                  => '',
             'namespaceModelSuffix'           => '',
             'withAutoloader'                 => true,
+            'overwrite'                      => true,
             'classNames'                     => '',
             'operationNames'                 => '',
             'sharedTypes'                    => false,

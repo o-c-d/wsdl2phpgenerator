@@ -103,8 +103,13 @@ class OutputManager
             }
 
             $file->addClass($class);
-            if($isModel && !empty($this->config->get('namespaceModelSuffix'))) $file->save($this->dir.DIRECTORY_SEPARATOR.$this->config->get('namespaceModelSuffix'));
-            else $file->save($this->dir);
+
+            $saveToPath = '';
+            if($isModel && !empty($this->config->get('namespaceModelSuffix'))) $saveToPath = $this->dir . DIRECTORY_SEPARATOR . $this->config->get('namespaceModelSuffix') ;
+            else $saveToPath = $this->dir;
+
+            $file->save($saveToPath, $this->config->get('overwrite'));
+
         }
     }
 
