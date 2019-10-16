@@ -100,7 +100,9 @@ class Operation
                 foreach ($validTypes as $type) {
                     if ($type instanceof ComplexType) {
                         if ($typeHint == $type->getPhpIdentifier()) {
-                            $ret .= (!empty($this->config->get('namespaceName')) ? $this->config->get('namespaceName')."\\":'').( !empty($this->config->get('namespaceModelSuffix')) ? $this->config->get('namespaceModelSuffix')."\\":'' ).$typeHint . ' ';
+                            // $ret .= (!empty($this->config->get('namespaceName')) ? $this->config->get('namespaceName')."\\":'');
+                            $ret .= ( !empty($this->config->get('namespaceModelSuffix')) ? $this->config->get('namespaceModelSuffix')."\\":'' );
+                            $ret .= $typeHint . ' ';
                             break;
                         }
                     }
@@ -132,7 +134,10 @@ class Operation
         $paramType = '';
         foreach ($this->params as $value => $typeHint) {
             if ($name == $value) {
-                $paramType =  (!empty($this->config->get('namespaceName')) ? $this->config->get('namespaceName')."\\":'').( !empty($this->config->get('namespaceModelSuffix')) ? $this->config->get('namespaceModelSuffix')."\\":'' ).$typeHint;
+                $paramType =  '';
+                // $paramType .=  (!empty($this->config->get('namespaceName')) ? $this->config->get('namespaceName')."\\":'');
+                $paramType .=  ( !empty($this->config->get('namespaceModelSuffix')) ? $this->config->get('namespaceModelSuffix')."\\":'' );
+                $paramType .=  ''.$typeHint;
             }
         }
 
