@@ -101,7 +101,7 @@ class Operation
                     if ($type instanceof ComplexType) {
                         if ($typeHint == $type->getPhpIdentifier()) {
                             // $ret .= (!empty($this->config->get('namespaceName')) ? $this->config->get('namespaceName')."\\":'');
-                            // $ret .= ( !empty($this->config->get('namespaceModelSuffix')) ? $this->config->get('namespaceModelSuffix')."\\":'' );
+                            $ret .= ( !empty($this->config->get('namespaceModelSuffix')) ? $this->config->get('namespaceModelSuffix')."\\":'' );
                             $ret .= $typeHint . ' ';
                             break;
                         }
@@ -136,7 +136,7 @@ class Operation
             if ($name == $value) {
                 $paramType =  '';
                 // $paramType .=  (!empty($this->config->get('namespaceName')) ? $this->config->get('namespaceName')."\\":'');
-                // $paramType .=  ( !empty($this->config->get('namespaceModelSuffix')) ? $this->config->get('namespaceModelSuffix')."\\":'' );
+                $paramType .=  ( !empty($this->config->get('namespaceModelSuffix')) ? $this->config->get('namespaceModelSuffix')."\\":'' );
                 $paramType .=  ''.$typeHint;
             }
         }

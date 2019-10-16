@@ -233,9 +233,6 @@ class Service implements ClassGenerator
             $source .= '        $response = $e->getMessage();'.PHP_EOL;
             $source .= '    }'.PHP_EOL;
             $source .= '    return $response;'.PHP_EOL;
-            // $source .= ''.PHP_EOL;
-            // $source = '';
-            // $source = '  return $this->__soapCall(\'' . $operation->getName() . '\', array(' . $operation->getParamStringNoTypeHints() . '));' . PHP_EOL;
 
             $paramStr = $operation->getParamString($this->types);
 
